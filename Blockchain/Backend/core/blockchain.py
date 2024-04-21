@@ -53,12 +53,6 @@ class Blockchain:
                                   merkleRoot = merkleRoot,
                                   timestamp = timestamp)
         blockHeader.mine()
-        
-        # newBlock = Block(BlockHeight = BlockHeight,
-        #                 Blocksize=self.Blocksize,
-        #                 BlockHeader=blockHeader,
-        #                 Parameters=self.paramPool[:nonce]
-        #                 )
                 
         self.write_on_disk([Block(BlockHeight = BlockHeight,
                                   Blocksize = self.Blocksize,

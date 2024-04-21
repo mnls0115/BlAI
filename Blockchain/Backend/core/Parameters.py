@@ -11,8 +11,6 @@ from Blockchain.Backend.util.util import (int_to_little_endian,
                                           bfloat16_bytes_to_float32)
 
 # Zero_HASH = b'\0' * 32
-# PRIVATEkey = '75164395420649513373157524276748244584997722405728738204141966805748925557554'
-# MINER_ADDRESS = '1QtKCDqbCv9EMVIbMgW8q2lij33Cwl2pb'
 # SIGHASH_ALL = 1
 
 class ParameterPosition:
