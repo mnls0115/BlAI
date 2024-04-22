@@ -18,9 +18,9 @@ VERSION = 1
 INITIAL_PARAMETER_NUM = 1250000
 
 class Blockchain:
-    def __init__(self, paramPool, Blocksize = None):
+    def __init__(self, paramPool = None, Blocksize = None):
         # self.utxos = utxos
-        self.paramPool = paramPool
+        self.paramPool = paramPool if paramPool is not None else []
         self.Blocksize = Blocksize if Blocksize is not None else 80
         # self.newBlockAvailable = newBlockAvailable
         # self.secondaryChain = secondaryChain
@@ -38,8 +38,24 @@ class Blockchain:
     def GenesisBlock(self):
         BlockHeight = 0
         prevBlockHash = Zero_HASH
-        self.addBlock(BlockHeight = BlockHeight,
-                      prevBlockHash = prevBlockHash)
+
+        
+
+        merkleRoot = ''
+        timestamp = int(time.time())
+
+        blockHeader = BlockHeader(version = VERSION,
+                                  prevBlockHash = prevBlockHash,
+                                  merkleRoot = merkleRoot,
+                                  timestamp = timestamp)
+        blockHeader.header_hash()
+        
+                
+        self.write_on_disk([Block(BlockHeight = BlockHeight,
+                                  Blocksize = self.Blocksize,
+                                  BlockHeader = blockHeader.__dict__,
+                                  Parameters=self.paramPool
+                                  ).__dict__])
         
     def addBlock(self, BlockHeight, prevBlockHash):
         self.paramPool = ParameterDB().read_and_remove(INITIAL_PARAMETER_NUM)

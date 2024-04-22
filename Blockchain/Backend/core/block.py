@@ -11,11 +11,12 @@ class Block:
     command = b'block'
 
     # txs > parameters, txcount > 제거, nonce > 제거
-    def __init__(self, BlockHeight, Blocksize, BlockHeader, Parameters):
+    def __init__(self, BlockHeight, Blocksize, BlockHeader, Parameters, code = None):
         self.BlockHeight = BlockHeight
         self.Blocksize = Blocksize
         self.BlockHeader = BlockHeader
         self.Parameters = Parameters
+        self.code = code if code is not None else None
 
     """
     @classmethod

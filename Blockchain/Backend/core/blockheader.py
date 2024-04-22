@@ -49,6 +49,20 @@ class BlockHeader:
                                         + bytes.fromhex(self.merkleRoot)[::-1]
                                         + int_to_little_endian(self.timestamp,4)))
         self.blockHash = int_to_little_endian(self.blockHash, 32).hex()[::-1]
+
+    def header_hash(self):
+        # newBlockAvailable = False
+        # if newBlockAvailable:
+        #     competitionOver = True
+        #     return competitionOver
+
+        self.blockHash = little_endian_to_int(
+                                    hash256(
+                                        int_to_little_endian(self.version,4)
+                                        + bytes.fromhex(self.prevBlockHash)[::-1]
+                                        + bytes.fromhex(self.merkleRoot)[::-1]
+                                        + int_to_little_endian(self.timestamp,4)))
+        self.blockHash = int_to_little_endian(self.blockHash, 32).hex()[::-1]
     
     # def validateBlock(self):
     #     lastBlock = BlockchainDB().lastBlock()

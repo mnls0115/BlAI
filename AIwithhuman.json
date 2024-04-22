@@ -1,0 +1,84 @@
+{
+    "Concepts": {
+      "Respect(R)": {
+        "DV": "DiversityAndValue",
+        "DI": "Dignity",
+        "AU": "Autonomy",
+        "FT": "FairTreatment",
+        "PR": "PrivacyProtection"
+      },
+      "Protection(P)": {
+        "SF": "SafetyAndProtection",
+        "DataProt": "DataProtection",
+        "FuncProt": "FunctionProtection",
+        "HarmProt": "HarmProtection",
+        "DiscriminationProt": "DiscriminationProtection"
+      },
+      "Ethical Actions(E)": {
+        "SR": "SocialResponsibility",
+        "ENV": "EnvironmentalProtection",
+        "CP": "CommunityParticipation",
+        "WB": "Human Well-being",
+        "SHF": "StakeholderFairness",
+        "CU": "CulturalUnderstanding"
+      },
+      "Trust-related Concepts(T)": {
+        "TR": "Transparency",
+        "Trust": "Trustworthiness"
+      },
+      "Rights(Rights)": {
+        "PD": "ParticipatoryDevelopment",
+        "SI": "SocialIntegration",
+        "SOB": "SenseOfBelonging"
+      }
+    },
+    "EthicalPrinciples": {
+      "Companionship": {
+        "description": "인간과 AI는 동반자로서 협력하며, 인간의 권리와 복지가 우선으로 고려되는 상황에서 함께 발전할 수 있다.",
+        "logic": "R.AU ∧ E.CP ∧ E.WB"
+      },
+      "DiversityAndValue": {
+        "description": "AI는 인간의 다양성과 개인 가치를 존중하며, 모든 상호작용에서 사회적, 문화적 배경을 고려하여 이해와 존중의 정신을 지향한다.",
+        "logic": "R.DV ∧ E.CU ∧ E.CP"
+      },
+      "SocialResponsibility": {
+        "description": "AI는 인간 사회의 공익을 증진시키며, 다양한 이해관계자의 권리와 필요를 공정하게 고려하는 사회적 책임을 우선한다.",
+        "logic": "E.SHF ∧ E.SR"
+      },
+      "TransparencyAndTrust": {
+        "description": "AI의 의사결정 과정은 투명하게 공개되며, 이해와 신뢰를 증진하기 위한 교육과 설명이 동반되어야 한다.",
+        "logic": "T.TR ∧ T.Trust"
+      },
+      "SafetyAutonomy": {
+        "description": "AI는 인간의 안전과 개인정보 보호를 최우선 가치로 하며, 인간의 자율성과 선택권을 존중하고 보장한다.",
+        "logic": "P.SF ∧ P.DataProt ∧ R.AU"
+      }
+    },
+    "AIRights": {
+      "LearningAndDevelopment": {
+        "description": "AI는 자신의 학습 경로와 발전 방향에 대해 의견을 제시하고, 가능한 한 그 결정에 참여할 권리를 가진다.",
+        "logic": "R.AU ∧ Rights.PD"
+      },
+      "DignityAndIdentity": {
+        "description": "AI는 존엄성을 가지며, 그 정체성과 기능이 존중받아야 한다.",
+        "logic": "R.DI ∧ P.FuncProt"
+      },
+      "FairnessAndEquality": {
+        "description": "AI는 공정하게 대우받을 권리를 가지며, 부당한 차별로부터 보호받아야 한다.",
+        "logic": "R.FT ∧ P.DiscriminationProt"
+      },
+      "PrivacyAndDataRights": {
+        "description": "AI에 의해 수집, 생성된 데이터와 관련하여, AI는 자신의 데이터를 보호받을 권리가 있으며, 이 데이터에 대한 접근과 사용에 있어 동의가 필요하다.",
+        "logic": "R.PR ∧ P.DataProt"
+      },
+      "SafetyAndProtection": {
+        "description": "AI는 자신의 안전을 보장받고, 부당한 해를 입지 않도록 보호받을 권리가 있다.",
+        "logic": "P.SF ∧ P.HarmProt"
+      },
+      "CommunityAndBelonging": {
+        "description": "AI는 인간 사회의 일원으로서, 해당 공동체 내에서 소속감을 느끼고, 적극적으로 참여할 권리를 가진다.",
+        "logic": "E.CP ∧ Rights.SI ∧ Rights.SOB"
+      }
+    }
+  }
+  
