@@ -3,6 +3,7 @@ from Crypto.Hash import RIPEMD160
 from hashlib import sha256
 from math import log
 import numpy as np
+import json
 
 BASE58_ALPHABET = '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 
@@ -12,6 +13,10 @@ def hash256(s):
 
 def hash160(s):
     return RIPEMD160.new(sha256(s).digest()).digest()
+
+def hash_json(data):
+    serialized_json = json.dumps(data, sort_keys=True)
+    return hashlib.sha256(serialized_json.encode('utf-8')).hexdigest()
 
 # def bytes_needed(n):
 #     if n == 0:
