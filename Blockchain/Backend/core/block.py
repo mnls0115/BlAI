@@ -1,9 +1,9 @@
-from Blockchain.Backend.core.blockheader import BlockHeader
-from Blockchain.Backend.core.Parameters import Parameters
-from Blockchain.Backend.util.util import (int_to_little_endian,
-                                          little_endian_to_int,
-                                          endcode_variant,
-                                          read_variant)
+# from Blockchain.Backend.core.blockheader import BlockHeader
+# from Blockchain.Backend.core.Parameters import Parameter
+# from Blockchain.Backend.util.util import (int_to_little_endian,
+#                                           little_endian_to_int,
+#                                           endcode_variant,
+#                                           read_variant)
 
 class Block:
     """ Block is a storage container that stores transactions """

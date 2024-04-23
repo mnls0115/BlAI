@@ -1,4 +1,7 @@
 import sys
+import struct
+import numpy as np
+
 sys.path.append('/Users/user/Dropbox/2024Projects/BlAI')
 # sys.path.append('/Users/mnls0/Dropbox/2024Projects/BlAI')
 
@@ -13,55 +16,88 @@ from Blockchain.Backend.util.util import (int_to_little_endian,
 # Zero_HASH = b'\0' * 32
 # SIGHASH_ALL = 1
 
-class ParameterPosition:
-    def __init__(self, layer, inlayer, wb, xy):
+class Parameter:
+    def __init__(self, layer, inlayer, wb, xy, value):
         self.layer = layer
         self.inlayer = inlayer
-        self.wb = 0 if wb == 'W' else 1 if wb == 'B' else None
+        self.wb = wb
         self.xy = xy
-
-    def change_to_bytes(self):
-        # W/B(2) and layer(128) = 1byte, inlayer(256) = 1byte, xy = 4bytes
-
+        self.value = value
+    
+    def to_bytes(self):
         if self.layer > 127:
-            raise ValueError (f"cannot to bytes d/t Layer({self.layer}) > 127, ")
-        
-        if self.wb == 0:
-            result = int_to_little_endian(self.layer, 1)
-        elif self.wb == 1:
-            result = int_to_little_endian(self.layer+128, 1)
-        else:
-            raise ValueError (f", cannot to bytes d/t WB = {self.wb}")
-        
-        result += int_to_little_endian(self.inlayer, 1)
-        x, y = self.xy
-        result += int_to_little_endian(x, 2)
-        result += int_to_little_endian(y, 2)
+            raise ValueError(f"Layer value {self.layer} cannot exceed 127.")
+        if self.wb not in {'W', 'B'}:
+            raise ValueError("Invalid value for wb; it must be 'W' or 'B'.")
 
-        return result
+        # wb 값을 바이트로 변환하기 전에 처리
+        wb_byte = self.layer if self.wb == 'W' else self.layer + 128
+        x, y = self.xy
+
+        bfloat16_value = np.float32(self.value).astype(np.float16)
+        value_bytes = bfloat16_value.tobytes()
+
+        return struct.pack('<BBHH2s', wb_byte, self.inlayer, x, y, value_bytes)
 
     @classmethod
-    def bytes_to_position(cls, byte):
-        if len(byte) != 6 or type(byte) != bytes:
-            raise ValueError (f"cannot to position d/t byte input : {byte}")
-        wb_layer = byte[0]
-        if wb_layer < 128:
-            wb = 'W'
-            layer = wb_layer
-        else:
-            wb = 'B'
-            layer = wb_layer - 128
-        inlayer = byte[1]
-        xy = (int.from_bytes(byte[2:4],'little'), int.from_bytes(byte[4:6],'little'))
-        return cls(layer, inlayer, wb, xy)
+    def bytes_to_parameter(cls, byte_data):
+        if len(byte_data) != 8 or type(byte_data) != bytes:
+            raise ValueError(f"cannot to position due to byte input: {byte_data}")
+        
+        # struct.unpack을 사용하여 바이트 데이터를 해석
+        wb_layer, inlayer, x, y, value_bytes = struct.unpack('<BBHH2s', byte_data)
+        value = np.frombuffer(value_bytes, dtype=np.float16).astype(np.float32)[0]
 
-class Parameters:
-    command = b'Parameters'
+        # W 또는 B 결정
+        wb = 'W' if wb_layer < 128 else 'B'
+        layer = wb_layer if wb == 'W' else wb_layer - 128
+        
+        return cls(layer, inlayer, wb, (x, y), value)
+
+    # 이전 to_bytes 함수
+    # def to_bytes(self):
+    #     # W/B(2) and layer(128) = 1byte, inlayer(256) = 1byte, xy = 4bytes
+    #     if self.layer > 127:
+    #         raise ValueError (f"cannot to bytes d/t Layer({self.layer}) > 127, ")
+        
+    #     if self.wb == 0:
+    #         result = int_to_little_endian(self.layer, 1)
+    #     elif self.wb == 1:
+    #         result = int_to_little_endian(self.layer+128, 1)
+    #     else:
+    #         raise ValueError (f", cannot to bytes d/t WB = {self.wb}")
+        
+    #     result += int_to_little_endian(self.inlayer, 1)
+    #     x, y = self.xy
+    #     result += int_to_little_endian(x, 2)
+    #     result += int_to_little_endian(y, 2)
+    #     result += float32_to_bfloat16_bytes(self.value)
+    #     return result
+
+    # @classmethod
+    # def bytes_to_parameter(cls, byte):
+    #     if len(byte) != 8 or type(byte) != bytes:
+    #         raise ValueError (f"cannot to position d/t byte input : {byte}")
+    #     wb_layer = byte[0]
+    #     wb = 'W' if wb_layer < 128 else 'B'
+    #     layer = wb_layer if wb == 'W' else wb_layer - 128
+    #     inlayer = byte[1]
+    #     x = int.from_bytes(byte[2:4],'little')
+    #     y = int.from_bytes(byte[4:6],'little')
+    #     value = bfloat16_bytes_to_float32(byte[6:8])
+
+    #     return cls(layer, inlayer, wb, (x, y), value)
+
+class ParameterList:
+    command = b'ParameterList'
     def __init__(self, parameterList=None):
         self.parameterList = parameterList if parameterList is not None else []
 
-    def add_parameter(self, position, value):
-        self.parameterList.append((position,value))
+    def add_parameter(self, parameter):
+        if type(parameter) == Parameter:
+            self.parameterList.append(parameter)
+        else:
+            raise ValueError(f"can`t add parameter to ParameterList {parameter}")
 
     def id(self):
         # Human readable Parameter id
@@ -72,43 +108,39 @@ class Parameters:
         return hash256(self.serialize())[::-1]
     
     def serialize(self):
-        result = endcode_variant(len(self.parameterList))
-
-        for paramTuple in self.parameterList:
-            if type(paramTuple[0]) != ParameterPosition:
-                raise ValueError (f'parameter posision is not right type {paramTuple}')
-            result += paramTuple[0].change_to_bytes()
-            result += float32_to_bfloat16_bytes(paramTuple[1])
-
-        return result
+        byte = (len(self.parameterList).to_bytes(4, 'little')
+                + b''.join(param.to_bytes() for param in self.parameterList))
+        return byte
         
     @classmethod
-    def parse(cls, s):
+    def parse(cls, byte_stream):
         # Takes a byte stream and parses the parameter at the start
         # return a parameters onbject
-
-        param_num = read_variant(s)
         parameterList = []
+        num_params = read_variant(byte_stream)
 
-        for _ in range(param_num):
-            byte = s.read(8)
-            parameterList.append((ParameterPosition.bytes_to_position(byte[:6]),
-                                  bfloat16_bytes_to_float32(byte[6:8])))
+        for _ in range(num_params):
+            byte = byte_stream.read(8)
+            parameterList.append(Parameter.bytes_to_parameter(byte))
         return cls(parameterList)
 
 # if __name__ == "__main__":
-# from io import BytesIO
-# #     parameter = ParameterPosition(127,6,'B',(540,130))
-# #     param_byte = parameter.change_to_bytes()
-# #     print(f"param_byte = {param_byte}")
-# #     print(f"다시 param으로 = {ParameterPosition.bytes_to_position(b'\xff\x06\x1c\x02\x82\x00').__dict__}")
+#     from io import BytesIO
+#     parameter = Parameter(127,6,'B',(540,130),1.7109375)
+#     param_byte = parameter.to_bytes()
+#     print(f"param_byte = {param_byte}")
 
-#     parameter = Parameters(parameterList=[(ParameterPosition(127,6,'B',(540,130)),0.1234512),
-#                                           (ParameterPosition(23,1,'W',(324,23)),0.4632432),
-#                                           (ParameterPosition(56,32,'B',(242,233)),0.214653),
-#                                           ])
-#     parameter_re = parameter.serialize()
-#     print(f'parameter_re = {parameter_re}')
+#     parameter = Parameter(127,6,'B',(540,130),-0.357421875)
+#     param_byte = parameter.to_bytes()
+#     print(f"param_byte = {param_byte}")
+
+#     print(f"다시 param으로 = {Parameter.bytes_to_parameter(param_byte).__dict__}")
+
+    # parameters = ParameterList(parameterList=[(Parameter(127,6,'B',(540,130),1.7109375)),
+    #                                          (Parameter(23,1,'W',(324,23),-1.1328125)),
+    #                                          (Parameter(56,32,'B',(242,233),-0.357421875))])
+    # parameter_re = parameters.serialize()
+    # print(f'parameter_re = {parameter_re}')
     
-#     rere = Parameters.parse(BytesIO(parameter_re))
-#     print (rere.__dict__)
+    # rere = ParameterList.parse(BytesIO(parameter_re))
+    # print (rere.__dict__)

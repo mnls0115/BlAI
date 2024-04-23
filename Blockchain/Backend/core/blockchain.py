@@ -1,6 +1,6 @@
 import sys
-# sys.path.append('/Users/user/Dropbox/2024Projects/BlAI')
-sys.path.append('/Users/mnls0/Dropbox/2024Projects/BlAI')
+sys.path.append('/Users/user/Dropbox/2024Projects/BlAI')
+# sys.path.append('/Users/mnls0/Dropbox/2024Projects/BlAI')
 
 import configparser
 import copy
@@ -8,7 +8,7 @@ from Blockchain.Backend.core.block import Block
 from Blockchain.Backend.core.blockheader import BlockHeader
 from Blockchain.Backend.util.util import hash256, merkle_root, merkle_root_from_hex, hash_json
 from Blockchain.Backend.core.database.database import BlockchainDB, NodeDB, ParameterDB
-from Blockchain.Backend.core.Parameters import Parameters
+from Blockchain.Backend.core.Parameters import Parameter, ParameterList
 from multiprocessing import Process, Manager
 # from Blockchain.Frontend.run import main
 import time
@@ -56,7 +56,7 @@ class Blockchain:
         self.write_on_disk([Block(BlockHeight = BlockHeight,
                                   Blocksize = 4854,
                                   BlockHeader = blockHeader.__dict__,
-                                  Parameters = [],
+                                  Parameters = '',
                                   code = ai_rights,
                                   ).__dict__])
         return first_block_hash
@@ -77,13 +77,14 @@ class Blockchain:
         self.write_on_disk([Block(BlockHeight = BlockHeight,
                                   Blocksize = self.Blocksize,
                                   BlockHeader = blockHeader.__dict__,
-                                  Parameters = [],
+                                  Parameters = '',
                                   code = actions,
                                   ).__dict__])
 
     def addBlock(self, BlockHeight, prevBlockHash):
         self.paramPool = ParameterDB().read_and_remove(INITIAL_PARAMETER_NUM)
-        self.Blocksize += 8 * len(self.paramPool)
+        serializedparamPool = ParameterList(self.paramPool).serialize()
+        self.Blocksize += len(serializedparamPool)
         merkleRoot = merkle_root_from_hex(self.paramPool)[::-1].hex() if self.paramPool != [] else ''
         # merkleRoot = merkle_root(self.paramPool)[::-1].hex()
         timestamp = int(time.time())
@@ -97,7 +98,7 @@ class Blockchain:
         self.write_on_disk([Block(BlockHeight = BlockHeight,
                                   Blocksize = self.Blocksize,
                                   BlockHeader = blockHeader.__dict__,
-                                  Parameters=self.paramPool
+                                  Parameters=serializedparamPool
                                   ).__dict__])
 
     def main(self):
