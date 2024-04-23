@@ -1,7 +1,5 @@
 # 블록체인 기반 AI
-
-![Example Image](images/Group 16.png)
-![Example Image](images/Group 17.png)
+![Example Image](images/Group 16.png) ![Example Image](images/Group 17.png)
 
 ## 소개
 본 프로젝트는 블록체인 기반으로 구현된 AI(인공지능) 시스템을 개발하기 위한 것입니다.
