@@ -1,3 +1,6 @@
+"""
+이전 random gen 
+
 import sys
 sys.path.append('/Users/user/Dropbox/2024Projects/BlAi')
 
@@ -35,3 +38,30 @@ if __name__ == '__main__':
       
         parameters = Parameters(parameterList=[(position, value)]).serialize()
         ParameterDB().write(parameters.hex())
+""" 
+inlayers = {'at1': 1,
+            'at2': 2,
+            'at3': 3,
+            'at4': 4,
+            'ff1' : 5,
+            'ff2' : 6,
+            'ff3' : 7,
+            'nn1' : 8,
+            'nn2' : 9}
+
+loaded_data = torch.load('/content/drive/MyDrive/2024projects/tensor.pt')
+for name, tensor in loaded_data.items():
+    if name == 'embedding':
+        pass
+    else:
+        layer = int(name[0])
+        inlayer = inlayers[name[1:4]]
+        wb = 'W'
+        x_num, y_num = tensor.size()
+        for x in range(x_num):
+            for y in range(y_num):
+                value = tensor[x, y] 
+
+
+# 1at1: tensor([[-2.7618e-03, -2.9053e-02, -3.1586e-03,  ...
+
