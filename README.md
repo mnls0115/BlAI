@@ -1,5 +1,4 @@
 # 블록체인 기반 AI (AI running on blockchain)
-![Example Image](images/Group%2016.png) ![Example Image](images/Group%2017.png)
 <br>
 
 ## 소개
@@ -11,6 +10,8 @@ Introduction
 This project is aimed at developing an AI (Artificial Intelligence) system implemented on a blockchain basis.
 By recording the AI's execution code, behavioral rules, hyperparameters, and parameters on the blockchain, we enhance the safety of the AI and provide it with continuous self-learning capabilities.
 This document elaborately explains the structure of the project, installation methods, usage examples, and the development process.
+<br>
+![Example Image](images/Group%2016.png) ![Example Image](images/Group%2017.png)
 <br>
 
 ## 본 LLM 코드는 llama3 8b model 을 사용하고 있습니다! 감사합니다 Meta!
@@ -84,3 +85,6 @@ This project is open-source and welcomes contributions from the community. Devel
 ## 라이선스 (License)
 이 프로젝트는 MIT 라이선스 하에 배포됩니다.
 This project is distributed under the MIT License.
+
+## 추가 고려 모델
+![Example Image](images/Group%2019.png)
