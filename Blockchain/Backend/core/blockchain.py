@@ -83,9 +83,10 @@ class Blockchain:
 
     def addBlock(self, BlockHeight, prevBlockHash):
         self.paramPool = ParameterDB().read_and_remove(INITIAL_PARAMETER_NUM)
-        serializedparamPool = ParameterList(self.paramPool).serialize()
-        self.Blocksize += len(serializedparamPool)
-        merkleRoot = merkle_root_from_hex(self.paramPool)[::-1].hex() if self.paramPool != [] else ''
+        if self.paramPool:
+            serializedparamPool = ParameterList(self.paramPool).serialize()
+            self.Blocksize += len(serializedparamPool)
+        merkleRoot = merkle_root_from_hex(self.paramPool)[::-1].hex() if self.paramPool else ''
         # merkleRoot = merkle_root(self.paramPool)[::-1].hex()
         timestamp = int(time.time())
 
@@ -98,7 +99,8 @@ class Blockchain:
         self.write_on_disk([Block(BlockHeight = BlockHeight,
                                   Blocksize = self.Blocksize,
                                   BlockHeader = blockHeader.__dict__,
-                                  Parameters=serializedparamPool
+                                  Parameters=serializedparamPool.hex() if self.paramPool else '',
+                                  code=''
                                   ).__dict__])
 
     def main(self):
@@ -113,6 +115,7 @@ class Blockchain:
             prevBlockHash = lastBlock["BlockHeader"]["blockHash"]
             self.addBlock(BlockHeight = BlockHeight,
                           prevBlockHash = prevBlockHash)
+            time.sleep(10)
 
 if __name__ == "__main__":
     blockchain = Blockchain([])
