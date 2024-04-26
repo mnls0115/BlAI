@@ -69,7 +69,6 @@ This project is open-source and welcomes contributions from the community. Devel
 <br>
 
 ## License
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
 This project is distributed under the MIT License.
 
 ## Additioanl considering model
