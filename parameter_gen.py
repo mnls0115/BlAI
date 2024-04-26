@@ -1,195 +1,107 @@
-"""
-이전 random gen 
-
-import sys
-sys.path.append('/Users/user/Dropbox/2024Projects/BlAi')
-
-import random
-from Blockchain.Backend.core.Parameters import Parameters, ParameterPosition
-from Blockchain.Backend.core.database.database import ParameterDB
-from Blockchain.Backend.util.util import float32_to_bfloat16_bytes
-
-
-BASE58_ALPHABET = '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-
-paramnums = 10000
-position_array = [(100277, 768),
-                  (1024, 768),
-                  (768,1),
-                  (2304, 768),
-                  (2304,1),
-                  (768, 768),
-                  (3072, 768),
-                  (3072,1),
-                  (768, 3072)]
-WB = ['W', 'B']
-
-if __name__ == '__main__':
-    print (len(ParameterDB().read()))
-    for idxx in range(paramnums):
-        layer,inlayer = random.randint(0,127), random.randint(0,255)
-        wb = WB[random.randint(0,1)]
-        xy = position_array[random.randint(1,8)]
-        position = ParameterPosition(layer=layer,
-                                     inlayer=inlayer,
-                                     wb=wb,
-                                     xy=xy)
-        value = 2*random.random()-1
-      
-        parameters = Parameters(parameterList=[(position, value)]).serialize()
-        ParameterDB().write(parameters.hex())
-""" 
 import torch
 import numpy as np
-import json
 import struct
+import os
 
-class Parameter:
-    def __init__(self, layer, inlayer, wb, xy, value):
-        self.layer = layer
-        self.inlayer = inlayer
-        self.wb = wb
-        self.xy = xy
-        self.value = value
-
-    def to_bytes(self):
-        if self.layer > 127:
-            raise ValueError(f"Layer value {self.layer} cannot exceed 127.")
-        if self.wb not in {'W', 'B'}:
-            raise ValueError("Invalid value for wb; it must be 'W' or 'B'.")
-
-        # wb 값을 바이트로 변환하기 전에 처리
-        wb_byte = self.layer if self.wb == 'W' else self.layer + 128
-        x, y = self.xy
-
-        bfloat16_value = np.float32(self.value).astype(np.float16)
-        value_bytes = bfloat16_value.tobytes()
-
-        return struct.pack('<BBHH2s', wb_byte, self.inlayer, x, y, value_bytes)
-
-inlayers = {'at1': 1,
-            'at2': 2,
-            'at3': 3,
-            'at4': 4,
-            'ff1': 5,
-            'ff2': 6,
-            'ff3': 7,
-            'nn1': 8,
-            'nn2': 9}
+from google.colab import drive
+drive.mount('/content/drive')
 
 loaded_data = torch.load('/content/drive/MyDrive/2024projects/tensor.pt')
-parameterList = []
 
-for name, tensor in loaded_data.items():
-    layer, inlayer = (0, 0)  # 기본 값 설정
-    wb = 'W'
-    x_num = tensor.size(0)
-    y_num = tensor.size(1) if tensor.dim() > 1 else 1  # 1차원 텐서 처리
+def bfloat16_to_bytes(tensor):
+    # 텐서의 차원 정보를 가져옴
+    dimensions = tensor.size()
 
-    if name == 'embedding':
-        print(f'embd 진입 : {name}')
-        layer = 0
-        inlayer = 0
-        for x in range(x_num//2):
-            for y in range(y_num):
-                value = float(tensor[x, y])
-                parameter = Parameter(layer=layer,
-                                    inlayer=inlayer,
-                                    wb='W',
-                                    xy=(x,y),
-                                    value=value)
-                parameterhex = parameter.to_bytes().hex()
-                parameterList.append(parameterhex)
-                
-        for x in range(x_num//2,x_num):
-            for y in range(y_num):
-                value = float(tensor[x, y])
-                parameter = Parameter(layer=layer,
-                                    inlayer=inlayer,
-                                    wb='B',
-                                    xy=(x-x_num//2,y),
-                                    value=value)
-                parameterhex = parameter.to_bytes().hex()
-                parameterList.append(parameterhex)
+    # bfloat16 텐서를 float16으로 변환
+    tensor_as_float16 = tensor.to(torch.float16)
 
-    elif name == 'last1':
-        print(f'last1 진입 : {name}')
-        layer = 127
-        inlayer = 0
-        for x in range(x_num):
-                value = float(tensor[x])
-                parameter = Parameter(layer=layer,
-                                        inlayer=inlayer,
-                                        wb='W',
-                                        xy=(x,0),
-                                        value=value)
-                parameterhex = parameter.to_bytes().hex()
-                parameterList.append(parameterhex)
+    # 차원 정보를 32비트 정수로 변환
+    dimensions_bytes = struct.pack('<' + 'I' * len(dimensions), *dimensions)
 
-    elif name == 'last2':
-        print(f'last2 진입 : {name}')
-        layer = 127
-        inlayer = 1
-        for x in range(x_num//2):
-            for y in range(y_num):
-                value = float(tensor[x, y])
-                parameter = Parameter(layer=layer,
-                                    inlayer=inlayer,
-                                    wb='W',
-                                    xy=(x,y),
-                                    value=value)
-                parameterhex = parameter.to_bytes().hex()
-                parameterList.append(parameterhex)
+    # 데이터를 바이트로 변환
+    data_bytes = tensor_as_float16.numpy().tobytes()
 
-        for x in range(x_num//2,x_num):
-            for y in range(y_num):
-                value = float(tensor[x, y])
-                parameter = Parameter(layer=layer,
-                                    inlayer=inlayer,
-                                    wb='B',
-                                    xy=(x-x_num//2,y),
-                                    value=value)
-                parameterhex = parameter.to_bytes().hex()
-                parameterList.append(parameterhex)
+    # 차원 바이트와 데이터 바이트를 결합
+    combined_bytes = dimensions_bytes + data_bytes
 
-    else:
-        len = len(name)
-        print(f'name : {name}, len : {len}')
-        if len == 4:
-            layer = int(name[0])
-            inlayer = int(inlayers[name[1:4]])
-        elif len == 5:
-            layer = int(name[0:2])
-            inlayer = int(inlayers[name[2:5]])
-        else:
-            raise ValueError (f"??? {name}, {tensor}")
+    # 결합된 바이트 데이터를 16진수 문자열로 변환
+    return combined_bytes.hex()
 
-        if y == 1:
-            for x in range(x_num):
-                value = float(tensor[x])
-                parameter = Parameter(layer=layer,
-                                        inlayer=inlayer,
-                                        wb='W',
-                                        xy=(x,0),
-                                        value=value)
-                parameterhex = parameter.to_bytes().hex()
-                parameterList.append(parameterhex)
-        else:
-            for x in range(x_num):
-                for y in range(y_num):
-                    value = float(tensor[x, y])
-                    parameter = Parameter(layer=layer,
-                                        inlayer=inlayer,
-                                        wb='W',
-                                        xy=(x,y),
-                                        value=value)
-                    parameterhex = parameter.to_bytes().hex()
-                    parameterList.append(parameterhex)
-    
-    # 파라미터 리스트를 JSON으로 변환
+def hex_to_bfloat16_tensor(layername, hex_data):
+    # 16진수 데이터를 바이트 데이터로 변환
+    byte_data = bytes.fromhex(hex_data)
 
-    with open('/content/drive/MyDrive/2024projects/parameters.json', 'w') as file:
-        json.dump(parameterList, file)
+    # 차원 정보 추출 (32비트 정수로 저장되었다고 가정)
+    num_dimensions = 1 if ('nn' in layername or 'last1' in layername) else 2 # 차원 수가 고정된 경우 (예: 2차원 텐서)
+    dimensions_bytes_length = 4 * num_dimensions
+    dimensions = struct.unpack('<' + 'I' * num_dimensions, byte_data[:dimensions_bytes_length])
 
-    print(f'name: {name}, layer: {layer}, inlayer: {inlayer}, WB:{wb}, (x,y):{(x,y)}, len : {len(parameterList)}')
-    print(f'parameters : {parameterList[-10:]}')
+    # 실제 데이터는 차원 정보 다음부터 시작
+    data_bytes = byte_data[dimensions_bytes_length:]
+
+    # 데이터를 numpy 배열로 변환
+    data_array = np.frombuffer(data_bytes, dtype=np.uint16)
+
+    # numpy 배열을 PyTorch의 bfloat16으로 변환
+    tensor = torch.from_numpy(data_array.view(np.float16)).to(dtype=torch.bfloat16)
+
+    # 차원 정보를 사용하여 텐서를 원래 차원으로 재구성
+    tensor = tensor.view(dimensions)
+
+    print(f'layer: {layername}, dimensions : {dimensions}')
+
+    return tensor
+
+# 이동하려는 파일이 있는 로컬 디렉토리
+source_directory = '/content/drive/MyDrive/2024projects/parameterTXT'
+# 파일을 이동할 목적지 디렉토리
+destination_directory = '/content/drive/MyDrive/2024projects/parameterPT/'
+
+def save_hex_to_file(hex_data, output_file_name):
+    # 지정된 폴더 경로
+    folder_path = '/content/drive/MyDrive/2024projects/parameterTXT'
+
+    # 전체 파일 경로 조합
+    output_file_path = os.path.join(folder_path, output_file_name)
+
+    # 파일 쓰기
+    with open(output_file_path, 'w') as file:
+        file.write(hex_data)
+
+# 각 레이어별로 파일 저장
+for name, param in loaded_data.items():
+    hex_representation = bfloat16_to_bytes(param)
+
+    print (name)
+    # output_file = f'layer_{name}_bytes_hex.txt'
+    # save_hex_to_file(hex_representation, output_file)
+    # print(f'{output_file} 으로 저장, length : {len(hex_representation)}')
+
+    # 텐서를 .pt 파일로 저장
+def save_tensor_to_pt(tensor, file_name):
+    torch.save(tensor, destination_directory + file_name)
+
+# 파일에서 16진수 데이터 읽기
+def read_hex_from_file(input_file):
+    with open(input_file, 'r') as file:
+        hex_data = file.read()
+    return hex_data
+
+# source_directory에서 파일 목록 가져오기
+files = os.listdir(source_directory)
+
+for file in files:
+    input_file = os.path.join(source_directory, file)
+    filename = file.replace('_bytes_hex.txt', '') + '_tensor'
+    output_file = f'{filename}.pt'
+
+    # 파일에서 16진수 데이터를 읽음
+    hex_data = read_hex_from_file(input_file)
+
+    # NumPy 배열을 PyTorch 텐서로 변환
+    tensor = hex_to_bfloat16_tensor(filename, hex_data)
+
+    # PyTorch 텐서를 .pt 파일로 저장
+    save_tensor_to_pt(tensor, output_file)
+
+    print (f'{filename} 저장됨. tensor: {tensor}')
