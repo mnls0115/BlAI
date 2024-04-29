@@ -1,6 +1,6 @@
 import sys
-sys.path.append('/Users/user/Dropbox/2024Projects/BlAI')
-# sys.path.append('/Users/mnls0/Dropbox/2024Projects/BlAI')
+sys.path.append('/Users/user/Dropbox/2024Projects/Bllama')
+# sys.path.append('/Users/mnls0/Dropbox/2024Projects/Bllama')
 
 import configparser
 import copy
@@ -23,6 +23,7 @@ class Blockchain:
         # self.utxos = utxos
         self.paramPool = paramPool if paramPool is not None else []
         self.Blocksize = Blocksize if Blocksize is not None else 80
+        self.generation = True
         # self.newBlockAvailable = newBlockAvailable
         # self.secondaryChain = secondaryChain
         # self.current_target = INITIAL_TARGET
@@ -35,7 +36,7 @@ class Blockchain:
     def fetch_last_block(self):
         blockchainDB = BlockchainDB()
         return blockchainDB.lastBlock()
-
+    
     def GenesisBlock(self):
         # 1st block, AI ethic, rights
         BlockHeight = 0
@@ -61,7 +62,7 @@ class Blockchain:
                                   ).__dict__])
         return first_block_hash
     
-    def codeBlock(self, BlockHeight, prevBlockHash):
+    def Genesis_code_Block(self, BlockHeight, prevBlockHash):
         # 2nd block, code
         with open('code.json', 'r', encoding='utf-8') as file:
             actions = json.load(file)
@@ -80,42 +81,43 @@ class Blockchain:
                                   Parameters = '',
                                   code = actions,
                                   ).__dict__])
-
+        
     def addBlock(self, BlockHeight, prevBlockHash):
         self.paramPool = ParameterDB().read_and_remove(INITIAL_PARAMETER_NUM)
         if self.paramPool:
             serializedparamPool = ParameterList(self.paramPool).serialize()
             self.Blocksize += len(serializedparamPool)
+
         merkleRoot = merkle_root_from_hex(self.paramPool)[::-1].hex() if self.paramPool else ''
         # merkleRoot = merkle_root(self.paramPool)[::-1].hex()
         timestamp = int(time.time())
 
         blockHeader = BlockHeader(version = VERSION,
-                                  prevBlockHash = prevBlockHash,
-                                  merkleRoot = merkleRoot,
-                                  timestamp = timestamp)
+                                prevBlockHash = prevBlockHash,
+                                merkleRoot = merkleRoot,
+                                timestamp = timestamp)
         blockHeader.mine()
                 
         self.write_on_disk([Block(BlockHeight = BlockHeight,
-                                  Blocksize = self.Blocksize,
-                                  BlockHeader = blockHeader.__dict__,
-                                  Parameters=serializedparamPool.hex() if self.paramPool else '',
-                                  code=''
-                                  ).__dict__])
+                                Blocksize = self.Blocksize,
+                                BlockHeader = blockHeader.__dict__,
+                                Parameters=serializedparamPool.hex() if self.paramPool else '',
+                                code=''
+                                ).__dict__])
 
     def main(self):
         lastBlock = self.fetch_last_block()
         if lastBlock is None:
             first_block_hash = self.GenesisBlock()
-            self.codeBlock(1, first_block_hash)
+            self.Genesis_code_Block(1, first_block_hash)
 
         while True:
-            lastBlock = self.fetch_last_block()
-            BlockHeight = lastBlock["BlockHeight"] + 1
-            prevBlockHash = lastBlock["BlockHeader"]["blockHash"]
-            self.addBlock(BlockHeight = BlockHeight,
-                          prevBlockHash = prevBlockHash)
-            time.sleep(10)
+                lastBlock = self.fetch_last_block()
+                BlockHeight = lastBlock["BlockHeight"] + 1
+                prevBlockHash = lastBlock["BlockHeader"]["blockHash"]
+                self.addBlock(BlockHeight = BlockHeight,
+                            prevBlockHash = prevBlockHash)
+                time.sleep(2)
 
 if __name__ == "__main__":
     blockchain = Blockchain([])
