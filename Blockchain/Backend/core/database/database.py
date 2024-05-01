@@ -45,6 +45,11 @@ class BlockchainDB(BaseDB):
         data = self.read()
         if data:
             return data[-1]
+    
+    def getBlock(self, BlockHeight):
+        data = self.read()
+        if data:
+            return data[BlockHeight]
         
 class AccountDB(BaseDB):
     def __init__(self):

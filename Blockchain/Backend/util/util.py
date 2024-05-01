@@ -2,8 +2,9 @@ import hashlib
 from Crypto.Hash import RIPEMD160
 from hashlib import sha256
 from math import log
-import numpy as np
+# import numpy as np
 import json
+import asyncio
 
 BASE58_ALPHABET = '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 
@@ -149,14 +150,18 @@ def merkle_root_from_hex(hexs):
 #         text_bytes = text_bytes[:fixed_length]
 #     return text_bytes
 
-def float32_to_bfloat16_bytes(value):
-    float32_val = np.float32(value)
-    int32_val = float32_val.view(np.int32)
-    int16_val = (int32_val >> 16).astype(np.uint16)
-    return int16_val.tobytes()  # 16비트 정수를 바이트로 변환
+# def float32_to_bfloat16_bytes(value):
+#     float32_val = np.float32(value)
+#     int32_val = float32_val.view(np.int32)
+#     int16_val = (int32_val >> 16).astype(np.uint16)
+#     return int16_val.tobytes()  # 16비트 정수를 바이트로 변환
 
-def bfloat16_bytes_to_float32(bfloat16_bytes):
-    int16_val = np.frombuffer(bfloat16_bytes, dtype=np.uint16)[0]  # 바이트에서 uint16로 변환
-    int32_val = np.uint32(int16_val) << 16
-    float32_val = np.int32(int32_val).view(np.float32)
-    return float32_val
+# def bfloat16_bytes_to_float32(bfloat16_bytes):
+#     int16_val = np.frombuffer(bfloat16_bytes, dtype=np.uint16)[0]  # 바이트에서 uint16로 변환
+#     int32_val = np.uint32(int16_val) << 16
+#     float32_val = np.int32(int32_val).view(np.float32)
+#     return float32_val
+
+def exec_codelines(code_line):
+    code = code_line.replace('\\"', '"').replace('\\n', '\n')
+    exec(code)

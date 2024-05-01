@@ -2,16 +2,14 @@ import sys
 import struct
 import numpy as np
 
-sys.path.append('/Users/user/Dropbox/2024Projects/BlAI')
-# sys.path.append('/Users/mnls0/Dropbox/2024Projects/BlAI')
+# sys.path.append('/Users/user/Dropbox/2024Projects/Bllama')
+sys.path.append('/Users/mnls0/Dropbox/2024Projects/Bllama')
 
 from Blockchain.Backend.util.util import (int_to_little_endian,
                                           little_endian_to_int,
                                           endcode_variant,
                                           read_variant,
-                                          hash256,
-                                          float32_to_bfloat16_bytes,
-                                          bfloat16_bytes_to_float32)
+                                          hash256,)
 
 # Zero_HASH = b'\0' * 32
 # SIGHASH_ALL = 1

@@ -1,0 +1,1 @@
+import asyncio\n\nasync def input_prompt(prompt):\n    print(prompt, end='', flush=True)\n    return await asyncio.to_thread(input)\n\nasyncio.run(input_prompt(\"Prompt: \"))
