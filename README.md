@@ -72,4 +72,5 @@ This project is open-source and welcomes contributions from the community. Devel
 This project is distributed under the MIT License.
 
 ## Visualize current model
-![Example Image](images/240501model.png)(images/Group20.png)
+![Example Image](images/240501model.png)
+![Example Image](images/Group20.png)
