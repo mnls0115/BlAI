@@ -71,5 +71,5 @@ This project is open-source and welcomes contributions from the community. Devel
 ## License
 This project is distributed under the MIT License.
 
-## Additioanl considering model
-![Example Image](images/Group%2019.png)
+## Visualize current model
+![Example Image](images/240501model.png)(images/Group20.png)
