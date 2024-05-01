@@ -57,7 +57,7 @@ class Blockchain:
                                   prevBlockHash = prevBlockHash,
                                   merkleRoot = merkleRoot,
                                   timestamp = timestamp)
-        first_block_hash = blockHeader.header_hash()
+        first_block_hash = blockHeader.mine()
                 
         self.write_on_disk([Block(BlockHeight = BlockHeight,
                                   Blocksize = 4854,
@@ -78,7 +78,7 @@ class Blockchain:
                                   prevBlockHash = prevBlockHash,
                                   merkleRoot = merkleRoot,
                                   timestamp = timestamp)
-        blockHeader.header_hash()
+        blockHeader.mine()
                 
         self.write_on_disk([Block(BlockHeight = BlockHeight,
                                   Blocksize = self.Blocksize,
@@ -108,7 +108,7 @@ class Blockchain:
         self.write_on_disk([Block(BlockHeight = BlockHeight,
                                 Blocksize = self.Blocksize,
                                 BlockHeader = blockHeader.__dict__,
-                                AI = serializedparamPool.hex() if self.paramPool else '',
+                                AI = serializedparamPool.hex(),
                                 Classification = 'Parameters'
                                 ).__dict__])
         
@@ -121,7 +121,7 @@ class Blockchain:
             # 다시 계산
             is_parameter = current_block['Classification'] == 'Parameters'
             calculated_merkleRoot = merkle_root_from_hex(self.paramPool)[::-1].hex() if is_parameter else hash_json(current_block['AI'])
-            calculated_hash = currentBlockHeader.header_hash()
+            calculated_hash = currentBlockHeader.mine()
 
             if (calculated_merkleRoot != currentBlockHeader.merkleRoot) or (calculated_hash != currentBlockHash):
                 raise InterruptedError (f'{BlockHeight} block hash is not right')
@@ -131,6 +131,10 @@ class Blockchain:
                     code_map = current_block['AI']
                     for codelines in code_map.values():
                         exec_codelines(codelines)
+
+                elif current_block['Classification'] == 'Parameters':
+                    pass
+                    # tensor 구현 
 
     def main(self):
         lastBlock = self.fetch_last_block()

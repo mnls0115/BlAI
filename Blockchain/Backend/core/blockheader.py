@@ -49,6 +49,7 @@ class BlockHeader:
                                         + bytes.fromhex(self.merkleRoot)[::-1]
                                         + int_to_little_endian(self.timestamp,4)))
         self.blockHash = int_to_little_endian(self.blockHash, 32).hex()[::-1]
+        return self.blockHash
 
     def header_hash(self):
         # newBlockAvailable = False
@@ -63,7 +64,7 @@ class BlockHeader:
                                         + bytes.fromhex(self.merkleRoot)[::-1]
                                         + int_to_little_endian(self.timestamp,4)))
         self.blockHash = int_to_little_endian(self.blockHash, 32).hex()[::-1]
-        return self.blockHash
+        
     
     # def validateBlock(self):
     #     lastBlock = BlockchainDB().lastBlock()
